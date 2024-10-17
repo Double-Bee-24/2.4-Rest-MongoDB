@@ -1,7 +1,12 @@
 import express, { Request, Response } from "express";
+import bodyParser from "body-parser";
 import router from "../routes/routes";
 
 const app = express();
+
+// set up body-parser
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(express.static("public"));
 
@@ -13,6 +18,6 @@ app.get("/", (req: Request, res: Response) => {
 
 app.use("/api/v1/items", router);
 
-app.listen(3000, () => {
-  console.log("Server is listening on http://localhost:3000");
+app.listen(3005, () => {
+  console.log("Server is listening on http://localhost:3005");
 });
