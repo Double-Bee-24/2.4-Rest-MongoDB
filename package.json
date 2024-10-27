@@ -5,24 +5,36 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rimraf ./dist && tsc",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "build-and-start": "npm run build && npm run start",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec \"ts-node\" src/server.ts"
+    "dev": "nodemon --watch 'src/**/*.ts' --exec \"ts-node --transpile-only\" src/server.ts",
+    "start-frontend": "http-server public -p 3000",
+    "dev:all": "npm-run-all --parallel dev start-frontend"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^4.21.1",
-    "rimraf": "^6.0.1"
+    "express-session": "^1.18.1",
+    "mongodb": "^6.9.0",
+    "rimraf": "^6.0.1",
+    "session-file-store": "^1.5.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
+    "@types/express-session": "^1.18.0",
     "@types/node": "^22.7.5",
     "nodemon": "^3.1.7",
+    "npm-run-all": "^4.1.5",
     "ts-node": "^10.9.2"
   }
 }

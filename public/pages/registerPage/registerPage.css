@@ -1,0 +1,46 @@
+body,
+button {
+  font-family: "Kanit", sans-serif;
+}
+
+#root {
+  width: 300px;
+  margin: 130px auto 0;
+}
+
+h2 {
+  margin-left: 65px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+input {
+  margin-bottom: 10px;
+  padding: 8px;
+  font-size: 16px;
+}
+
+button {
+  padding: 10px;
+  font-size: 16px;
+  background-color: #6c63ff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #8d86ff;
+}
+
+#message {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+#login-section {
+  margin-left: 30px;
+}
