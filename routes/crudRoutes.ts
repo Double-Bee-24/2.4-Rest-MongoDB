@@ -1,24 +1,18 @@
-import express, { Response, Request } from "express";
-import { client } from "../src/database";
-import { ObjectId } from "mongodb";
-
-interface ITodo {
-  id: number;
-  text: string;
-  checked: boolean;
-  user_id: ObjectId;
-}
-
-const todo_db = client.db("todo_db");
-const todoItemsCollection = todo_db.collection("todoItemsCollection");
+import { Response, Request } from "express";
+import { ResultSetHeader } from "mysql2/promise";
+import connection from "../src/database";
 
 // Returns todo items list to frontend
 const getItems = async (req: Request, res: Response, userId: string) => {
   try {
-    const todos = await todoItemsCollection
-      .find({ userId: new ObjectId(userId) })
-      .toArray();
-    res.status(200).json({ items: todos });
+    const query = "SELECT * FROM todos WHERE user_id = ?";
+    connection.query(query, [userId], (err, results) => {
+      if (err) {
+        console.error("Error fetching todos:", err);
+        return res.status(500).json({ error: "Internal server error" });
+      }
+      res.status(200).json({ items: results });
+    });
   } catch (error) {
     console.error("Error sending data to the browser", error);
     res.status(500).json({ error: "Internal server error" });
@@ -32,27 +26,37 @@ const addItem = async (req: Request, res: Response, userId: string) => {
     if (!text) {
       return res.status(400).json({ error: "Text is required" });
     }
-    const doc = { checked: false, text, userId: new ObjectId(userId) };
-    const result = await todoItemsCollection.insertOne(doc);
-    res.status(201).json({ id: result.insertedId });
+    const query = "INSERT INTO todos (user_id, text) VALUES (?, ?)";
+    connection.query<ResultSetHeader>(query, [userId, text], (err, results) => {
+      if (err) {
+        console.error("Error creating item:", err);
+        return res.status(500).json({ error: "Cannot create item" });
+      }
+      res.status(201).json({ id: results.insertId });
+    });
   } catch (error) {
     console.error("Error creating item:", error);
     res.status(500).json({ error: "Cannot create item" });
   }
 };
 
-// Edites existing todo item
+// Edits existing todo item
 const editItem = async (req: Request, res: Response, userId: string) => {
   try {
     const { id, text, checked } = req.body;
     if (!id || text === undefined || checked === undefined) {
       return res.status(400).json({ error: "Missing fields" });
     }
-    await todoItemsCollection.updateOne(
-      { _id: new ObjectId(id), userId: new ObjectId(userId) },
-      { $set: { text, checked } }
-    );
-    res.status(200).json({ ok: true });
+
+    const query =
+      "UPDATE todos SET text = ?, checked = ? WHERE id = ? AND user_id = ?";
+    connection.query(query, [text, checked, id, userId], (err) => {
+      if (err) {
+        console.error("Error updating item:", err);
+        return res.status(500).json({ error: "Cannot update item" });
+      }
+      res.status(200).json({ ok: true });
+    });
   } catch (error) {
     console.error("Error updating item:", error);
     res.status(500).json({ error: "Cannot update item" });
@@ -66,16 +70,18 @@ const deleteItem = async (req: Request, res: Response, userId: string) => {
     if (!id) {
       return res.status(400).json({ error: "Missing id" });
     }
-    await todoItemsCollection.deleteOne({
-      _id: new ObjectId(id),
-      userId: new ObjectId(userId),
+    const query = "DELETE FROM todos WHERE id = ? AND user_id = ?";
+    connection.query(query, [id, userId], (err) => {
+      if (err) {
+        console.error("Error deleting item:", err);
+        return res.status(500).json({ error: "Cannot delete item" });
+      }
+      res.send({ ok: true });
     });
-    res.send({ ok: true });
   } catch (error) {
     console.error("Error deleting item:", error);
     res.status(500).json({ error: "Cannot delete item" });
   }
 };
 
-// export default router;
 export { getItems, editItem, addItem, deleteItem };

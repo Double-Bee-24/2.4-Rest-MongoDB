@@ -8,19 +8,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteItem = exports.addItem = exports.editItem = exports.getItems = void 0;
-const database_1 = require("../src/database");
-const mongodb_1 = require("mongodb");
-const todo_db = database_1.client.db("todo_db");
-const todoItemsCollection = todo_db.collection("todoItemsCollection");
+const database_1 = __importDefault(require("../src/database"));
 // Returns todo items list to frontend
 const getItems = (req, res, userId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const todos = yield todoItemsCollection
-            .find({ userId: new mongodb_1.ObjectId(userId) })
-            .toArray();
-        res.status(200).json({ items: todos });
+        const query = "SELECT * FROM todos WHERE user_id = ?";
+        database_1.default.query(query, [userId], (err, results) => {
+            if (err) {
+                console.error("Error fetching todos:", err);
+                return res.status(500).json({ error: "Internal server error" });
+            }
+            res.status(200).json({ items: results });
+        });
     }
     catch (error) {
         console.error("Error sending data to the browser", error);
@@ -35,9 +39,14 @@ const addItem = (req, res, userId) => __awaiter(void 0, void 0, void 0, function
         if (!text) {
             return res.status(400).json({ error: "Text is required" });
         }
-        const doc = { checked: false, text, userId: new mongodb_1.ObjectId(userId) };
-        const result = yield todoItemsCollection.insertOne(doc);
-        res.status(201).json({ id: result.insertedId });
+        const query = "INSERT INTO todos (user_id, text) VALUES (?, ?)";
+        database_1.default.query(query, [userId, text], (err, results) => {
+            if (err) {
+                console.error("Error creating item:", err);
+                return res.status(500).json({ error: "Cannot create item" });
+            }
+            res.status(201).json({ id: results.insertId });
+        });
     }
     catch (error) {
         console.error("Error creating item:", error);
@@ -45,15 +54,21 @@ const addItem = (req, res, userId) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.addItem = addItem;
-// Edites existing todo item
+// Edits existing todo item
 const editItem = (req, res, userId) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id, text, checked } = req.body;
         if (!id || text === undefined || checked === undefined) {
             return res.status(400).json({ error: "Missing fields" });
         }
-        yield todoItemsCollection.updateOne({ _id: new mongodb_1.ObjectId(id), userId: new mongodb_1.ObjectId(userId) }, { $set: { text, checked } });
-        res.status(200).json({ ok: true });
+        const query = "UPDATE todos SET text = ?, checked = ? WHERE id = ? AND user_id = ?";
+        database_1.default.query(query, [text, checked, id, userId], (err) => {
+            if (err) {
+                console.error("Error updating item:", err);
+                return res.status(500).json({ error: "Cannot update item" });
+            }
+            res.status(200).json({ ok: true });
+        });
     }
     catch (error) {
         console.error("Error updating item:", error);
@@ -68,11 +83,14 @@ const deleteItem = (req, res, userId) => __awaiter(void 0, void 0, void 0, funct
         if (!id) {
             return res.status(400).json({ error: "Missing id" });
         }
-        yield todoItemsCollection.deleteOne({
-            _id: new mongodb_1.ObjectId(id),
-            userId: new mongodb_1.ObjectId(userId),
+        const query = "DELETE FROM todos WHERE id = ? AND user_id = ?";
+        database_1.default.query(query, [id, userId], (err) => {
+            if (err) {
+                console.error("Error deleting item:", err);
+                return res.status(500).json({ error: "Cannot delete item" });
+            }
+            res.send({ ok: true });
         });
-        res.send({ ok: true });
     }
     catch (error) {
         console.error("Error deleting item:", error);

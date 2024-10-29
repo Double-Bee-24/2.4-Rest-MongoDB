@@ -77,9 +77,15 @@ const openAddDialogue = (rootElement, todosContainer) => {
 // changes styles depending on whether todoElement is checked or not
 const toggleTodo = (todoCheckBox, todoText, todo, todosContainer) => {
   if (todoCheckBox.classList.contains("checked")) {
-    editItem({ id: todo._id, text: todo.text, checked: false }, todosContainer);
+    editItem(
+      { id: todo._id || todo.id, text: todo.text, checked: false },
+      todosContainer
+    );
   } else {
-    editItem({ id: todo._id, text: todo.text, checked: true }, todosContainer);
+    editItem(
+      { id: todo._id || todo.id, text: todo.text, checked: true },
+      todosContainer
+    );
   }
 };
 
@@ -97,7 +103,7 @@ const editTodo = (todo, todoElement, todosContainer) => {
   // send data to the server
   acceptIcon.addEventListener("click", () =>
     editItem(
-      { id: todo._id, check: todo.check, text: inputElement.value },
+      { id: todo._id || todo.id, check: todo.check, text: inputElement.value },
       todosContainer
     )
   );
@@ -275,7 +281,7 @@ const createList = async (mainContainer) => {
     const removeIcon = createCustomEl("img", iconsContainer, "icon");
     removeIcon.setAttribute("src", "assets/trash.png");
     removeIcon.addEventListener("click", async () => {
-      await deleteItem(todo._id, mainContainer);
+      await deleteItem(todo.id, mainContainer);
     });
 
     const editIcon = createCustomEl("img", iconsContainer, "icon");

@@ -1,16 +1,25 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
-const database_1 = require("./database");
 const body_parser_1 = __importDefault(require("body-parser"));
-const router_1 = __importDefault(require("./router"));
 const express_session_1 = __importDefault(require("express-session"));
-const authMiddleware_1 = require("../middleware/authMiddleware");
 const FileStore = require("session-file-store")(express_session_1.default);
+const authMiddleware_1 = require("../middleware/authMiddleware");
+const database_1 = __importDefault(require("./database"));
+const router_1 = __importDefault(require("./router"));
 const app = (0, express_1.default)();
 // Enable CORS for all routes
 app.use((0, cors_1.default)({
@@ -33,12 +42,14 @@ app.use((0, express_session_1.default)({
 }));
 app.set("view engine", "ejs");
 app.use("/api/v2/router", authMiddleware_1.authMiddleware, router_1.default);
-(0, database_1.run)()
-    .then(() => {
-    app.listen(3005, () => {
-        console.log("Server is listening on http://localhost:3005");
-    });
-})
-    .catch((error) => {
-    console.error("Failed to start the server due to database connection error:", error);
+app.get("/", (req, res) => {
+    res.send("Сервер працює!");
 });
+const showResult = () => __awaiter(void 0, void 0, void 0, function* () {
+    const [rows] = yield database_1.default.promise().query("SELECT * FROM users");
+    console.log(rows);
+});
+app.listen(3005, () => {
+    console.log(`Server is running at http://localhost:${3005}`);
+});
+showResult();

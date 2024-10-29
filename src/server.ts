@@ -1,11 +1,10 @@
 import express from "express";
 import cors from "cors";
-import { run } from "./database";
 import bodyParser from "body-parser";
-import router from "./router";
 import session from "express-session";
-import { authMiddleware } from "../middleware/authMiddleware";
 const FileStore = require("session-file-store")(session);
+import { authMiddleware } from "../middleware/authMiddleware";
+import router from "./router";
 
 const app = express();
 
@@ -40,15 +39,6 @@ app.set("view engine", "ejs");
 
 app.use("/api/v2/router", authMiddleware, router);
 
-run()
-  .then(() => {
-    app.listen(3005, () => {
-      console.log("Server is listening on http://localhost:3005");
-    });
-  })
-  .catch((error) => {
-    console.error(
-      "Failed to start the server due to database connection error:",
-      error
-    );
-  });
+app.listen(3005, () => {
+  console.log(`Server is running at http://localhost:${3005}`);
+});
