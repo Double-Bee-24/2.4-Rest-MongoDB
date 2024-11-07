@@ -32,7 +32,7 @@ app.use(
     secret: "cat_parrot_fish",
     resave: true,
     saveUninitialized: false,
-    cookie: { maxAge: 360000000, sameSite: "lax", secure: false }, // 100 hour
+    cookie: { maxAge: 360000000, sameSite: "lax", secure: false }, // 100 hours
   })
 );
 

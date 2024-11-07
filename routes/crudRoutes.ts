@@ -1,13 +1,6 @@
-import express, { Response, Request } from "express";
+import { Response, Request } from "express";
 import { client } from "../src/database";
 import { ObjectId } from "mongodb";
-
-interface ITodo {
-  id: number;
-  text: string;
-  checked: boolean;
-  user_id: ObjectId;
-}
 
 const todo_db = client.db("todo_db");
 const todoItemsCollection = todo_db.collection("todoItemsCollection");

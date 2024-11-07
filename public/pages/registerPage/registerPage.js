@@ -18,8 +18,8 @@ const createUser = async (credentials) => {
     });
 
     if (!response.ok) {
-      const errorMessage = await response.text();
-      throw new Error(errorMessage);
+      const errorData = await response.json();
+      throw new Error(errorData.error || "An error occurred");
     }
 
     return await response.json();
@@ -57,8 +57,6 @@ document
     // Send credentials to server
     try {
       await createUser({ email, password });
-      messageElement.textContent = `User ${email} successfully registered!`;
-      messageElement.style.color = "green";
 
       // Redirect to login page
       window.location.href = "../loginPage/loginPage.html";

@@ -1,7 +1,7 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
 import dotenv from "dotenv";
 
-// need to access env variable safely
+// Need to access env variable safely
 dotenv.config();
 
 const uri = process.env.MONGODB_URI || "";

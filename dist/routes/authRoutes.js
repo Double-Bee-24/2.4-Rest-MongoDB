@@ -38,7 +38,6 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             id: user._id,
             email: user.email,
         };
-        console.log("Session user in auth routes", req.session.user);
         res.status(200).json({ ok: true });
     }
     catch (error) {
